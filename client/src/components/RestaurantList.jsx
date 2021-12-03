@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import RestaurantFinder from "../apis/RestaurantFinder";
 import { RestaurantsContext } from "../context/RestaurantsContext";
+import StarRating from "./StarRating";
 
 function RestaurantList() {
   const { restaurants, setRestaurants } = useContext(RestaurantsContext);
@@ -12,7 +13,7 @@ function RestaurantList() {
     async function fetchData() {
       try {
         const response = await RestaurantFinder.get("/");
-
+        console.log(response);
         setRestaurants(response.data.data.restaurants);
       } catch (err) {}
     }
@@ -41,6 +42,19 @@ function RestaurantList() {
   const handleRestaurantSelect = (id) => {
     navigate(`restaurants/${id}`);
   };
+
+  const renderRating = (restaurant) => {
+    if (!restaurant.count) {
+      return <span>0 reviews</span>;
+    }
+
+    return (
+      <>
+        <StarRating rating={restaurant.average_rating} />
+        <span className='rev_count'>{restaurant.count}</span>
+      </>
+    );
+  };
   return (
     <div className='list'>
       <Table>
@@ -64,7 +78,7 @@ function RestaurantList() {
                   <td>{restaurant.name}</td>
                   <td>{restaurant.location}</td>
                   <td>{"$".repeat(restaurant.price_range)}</td>
-                  <td>Rating</td>
+                  <td>{renderRating(restaurant)}</td>
                   <td>
                     <button onClick={(e) => handleUpdate(e, restaurant.id)}>
                       Update
@@ -97,5 +111,9 @@ const Table = styled.table`
   /* tbody tr:nth-child(2) {
     background-color: red;
   } */
+
+  .rev_count {
+    margin-left: 5px;
+  }
 `;
 export default RestaurantList;
